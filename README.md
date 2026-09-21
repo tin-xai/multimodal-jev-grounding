@@ -22,6 +22,8 @@ Built with Qwen2.5-VL-3B-Instruct, LoRA, and a lightweight box-regression head. 
 
 Each frame shows option probabilities, the predicted box in red, and the ground-truth box in green.
 
+**Inference speed:** approximately **0.406 seconds per image** (**2.46 images/second**) on one A100 40 GB GPU, batch size 1, after the model is loaded. This measures the model forward pass and excludes model startup.
+
 ## Results
 
 The completed experiment used eight NVIDIA A100 40 GB GPUs for three epochs:

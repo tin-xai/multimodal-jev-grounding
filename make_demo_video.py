@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 import torch
@@ -51,6 +52,7 @@ def main():
 
     args.work_dir.mkdir(parents=True, exist_ok=True)
     font = ImageFont.load_default()
+    inference_seconds = []
     for index, row in enumerate(rows):
         image = Image.open(row["image"]).convert("RGB")
         conversations = [[{"role": "user", "content": [
@@ -60,8 +62,12 @@ def main():
         text = processor.apply_chat_template(conversations, tokenize=False, add_generation_prompt=True)
         inputs = processor(text=text, images=[image], return_tensors="pt", padding=True)
         inputs = {key: value.to(device) if torch.is_tensor(value) else value for key, value in inputs.items()}
+        start = time.perf_counter()
         with torch.inference_mode():
             logits, boxes = model(**inputs)
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+        inference_seconds.append(time.perf_counter() - start)
         probabilities = logits.float().softmax(-1)[0].cpu().tolist()
         predicted_box = boxes[0].float().cpu().tolist()
         predicted_index = int(torch.tensor(probabilities).argmax())
@@ -128,7 +134,7 @@ def main():
         for frame in frames:
             writer.write(cv2.cvtColor(__import__("numpy").array(frame), cv2.COLOR_RGB2BGR))
         writer.release()
-    print(args.output)
+    print(f"{args.output} | avg_inference_seconds_per_image={sum(inference_seconds) / len(inference_seconds):.3f}")
 
 
 if __name__ == "__main__":
