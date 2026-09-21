@@ -56,9 +56,9 @@ def main():
         "/System/Library/Fonts/Supplemental/Arial.ttf",
     ]
     font_path = next((path for path in font_candidates if Path(path).exists()), None)
-    font = ImageFont.truetype(font_path, 28) if font_path else ImageFont.load_default()
-    small_font = ImageFont.truetype(font_path, 22) if font_path else font
-    title_font = ImageFont.truetype(font_path, 36) if font_path else font
+    font = ImageFont.truetype(font_path, 42) if font_path else ImageFont.load_default()
+    small_font = ImageFont.truetype(font_path, 32) if font_path else font
+    title_font = ImageFont.truetype(font_path, 54) if font_path else font
     inference_seconds = []
     for index, row in enumerate(rows):
         image = Image.open(row["image"]).convert("RGB")
@@ -80,10 +80,10 @@ def main():
         predicted_index = int(torch.tensor(probabilities).argmax())
 
         canvas = Image.new("RGB", (1600, 900), "#101522")
-        image.thumbnail((1080, 820))
-        canvas.paste(image, (30 + (1080 - image.width) // 2, 40))
+        image.thumbnail((950, 820))
+        canvas.paste(image, (30 + (950 - image.width) // 2, 40))
         draw = ImageDraw.Draw(canvas)
-        image_x = 30 + (1080 - image.width) // 2
+        image_x = 30 + (950 - image.width) // 2
         image_y = 40
         draw.rectangle((image_x, image_y, image_x + image.width, image_y + image.height), outline="#ffffff", width=2)
         scale_x, scale_y = image.width, image.height
@@ -96,22 +96,22 @@ def main():
         draw.text((pred[0] + 5, max(image_y, pred[1] - 14)), "predicted", fill="#ff4d5e", font=font)
         draw.text((gt[0] + 5, max(image_y, gt[1] - 28)), "ground truth", fill="#46e37b", font=font)
 
-        panel_x = 1170
+        panel_x = 1030
         draw.text((panel_x, 50), "MULTIMODAL JEV", fill="#ffffff", font=title_font)
         draw.text((panel_x, 105), "Question: Which bird species?", fill="#b9c4d6", font=small_font)
         draw.text((panel_x, 155), f"Prediction: {row['options'][predicted_index].replace('_', ' ')}", fill="#ffffff", font=font)
         draw.text((panel_x, 200), f"Ground truth: {row['class_name'].split('.', 1)[-1].replace('_', ' ')}", fill="#46e37b", font=font)
         draw.text((panel_x, 265), "Option probabilities", fill="#ffffff", font=font)
         for choice_index, (option, probability) in enumerate(zip(row["options"], probabilities)):
-            y = 320 + choice_index * 92
+            y = 330 + choice_index * 105
             label = option.replace('_', ' ')
             draw.text((panel_x, y), f"{choice_index}: {label[:24]}", fill="#dce4f2", font=small_font)
-            draw.rectangle((panel_x, y + 34, panel_x + 320, y + 55), fill="#26344d")
-            draw.rectangle((panel_x, y + 34, panel_x + int(320 * probability), y + 55), fill="#5aa9ff" if choice_index != predicted_index else "#ffbd59")
-            draw.text((panel_x + 335, y + 28), f"{probability:.3f}", fill="#ffffff", font=small_font)
-        draw.text((panel_x, 720), "Red: predicted box", fill="#ff4d5e", font=small_font)
-        draw.text((panel_x, 760), "Green: ground-truth box", fill="#46e37b", font=small_font)
-        draw.text((panel_x, 825), f"CUB test image {index + 1}/{len(rows)}", fill="#7f8da6", font=small_font)
+            draw.rectangle((panel_x, y + 42, panel_x + 410, y + 68), fill="#26344d")
+            draw.rectangle((panel_x, y + 42, panel_x + int(410 * probability), y + 68), fill="#5aa9ff" if choice_index != predicted_index else "#ffbd59")
+            draw.text((panel_x + 425, y + 32), f"{probability:.3f}", fill="#ffffff", font=small_font)
+        draw.text((panel_x, 765), "Red: predicted box", fill="#ff4d5e", font=small_font)
+        draw.text((panel_x, 810), "Green: ground-truth box", fill="#46e37b", font=small_font)
+        draw.text((panel_x, 855), f"CUB test image {index + 1}/{len(rows)}", fill="#7f8da6", font=small_font)
         canvas.save(args.work_dir / f"frame-{index:04d}.png")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
