@@ -18,6 +18,8 @@ Built with Qwen2.5-VL-3B-Instruct, LoRA, and a lightweight box-regression head. 
 
 [Download the annotated demo video](cub_jev_demo.mp4)
 
+![Multimodal JEV grounding demo](cub_jev_demo.gif)
+
 Each frame shows option probabilities, the predicted box in red, and the ground-truth box in green.
 
 ## Results
