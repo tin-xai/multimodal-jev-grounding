@@ -1,0 +1,6 @@
+torch
+transformers>=4.51.0
+Pillow
+accelerate
+safetensors
+peft

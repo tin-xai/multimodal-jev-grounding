@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+data/CUB_200_2011/
+data/CUB_200_2011.tgz
+data/cub_records/
+runs/
+*.log
