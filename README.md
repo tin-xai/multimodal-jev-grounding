@@ -43,6 +43,21 @@ logits for 0, 1, 2, 3 → softmax → option probabilities
 
 This avoids autoregressive JSON decoding and gives downstream systems a compact interface. The grounding branch adds the visual answer: not just what the model chose, but where the relevant object is.
 
+## Simple JEV compatibility and current limitations
+
+The option-probability calculation follows the same core idea as Simple JEV: select the permitted next-token logits and apply a numerically stable softmax over only those labels. The hard-label option loss is also equivalent to selected-label cross-entropy.
+
+This repository is currently a simplified multimodal extension, not a drop-in implementation of Simple JEV v1. In particular:
+
+- the prototype uses exactly four numeric labels, `0`–`3`;
+- Simple JEV’s general choice protocol supports up to 50 dynamically mapped candidates;
+- the prototype uses a custom multimodal prompt instead of the full v1 JSON-style prompt contract;
+- the prototype does not yet map arbitrary public option IDs to Simple JEV’s internal answer symbols;
+- label validation is currently simpler than Simple JEV’s exact rendered-boundary token-stability check;
+- bounding-box prediction is an additional regression branch that is not part of Simple JEV’s original scorer.
+
+Therefore, the current model should be described as **JEV-style multimodal grounding**. Supporting the full Simple JEV contract would require dynamic option labels, public-label mapping, exact prompt-boundary validation, and reuse of the versioned v1 prompt/scoring modules.
+
 ## Dataset: CUB-200-2011
 
 CUB-200-2011 contains 11,788 bird images across 200 species and provides one object bounding box per image. See the [official Caltech page](https://www.vision.caltech.edu/datasets/cub_200_2011/).
@@ -135,6 +150,8 @@ The output contains the selected option, probabilities, normalized coordinates, 
 - compare against a dedicated detector or grounding model.
 
 ## Citation
+
+This project builds on the JEV-style selected-logit approach explored by [Featherless AI’s Simple JEV](https://github.com/featherless-ai/simple-jev/tree/main).
 
 ```text
 Wah, C., Branson, S., Welinder, P., Perona, P., and Belongie, S.
